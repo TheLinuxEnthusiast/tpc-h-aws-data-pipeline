@@ -1,0 +1,57 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "SecretsManagerDbCredentialsAccess",
+            "Effect": "Allow",
+            "Action": [
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:PutResourcePolicy",
+                "secretsmanager:PutSecretValue",
+                "secretsmanager:DeleteSecret",
+                "secretsmanager:DescribeSecret",
+                "secretsmanager:TagResource"
+            ],
+            "Resource": "arn:aws:secretsmanager:*:*:secret:rds-db-credentials/*"
+        },
+        {
+            "Sid": "RDSDataServiceAccess",
+            "Effect": "Allow",
+            "Action": [
+                "dbqms:CreateFavoriteQuery",
+                "dbqms:DescribeFavoriteQueries",
+                "dbqms:UpdateFavoriteQuery",
+                "dbqms:DeleteFavoriteQueries",
+                "dbqms:GetQueryString",
+                "dbqms:CreateQueryHistory",
+                "dbqms:DescribeQueryHistory",
+                "dbqms:UpdateQueryHistory",
+                "dbqms:DeleteQueryHistory",
+                "rds-data:ExecuteSql",
+                "rds-data:ExecuteStatement",
+                "rds-data:BatchExecuteStatement",
+                "rds-data:BeginTransaction",
+                "rds-data:CommitTransaction",
+                "rds-data:RollbackTransaction",
+                "secretsmanager:CreateSecret",
+                "secretsmanager:ListSecrets",
+                "secretsmanager:GetRandomPassword",
+                "tag:GetResources"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:Get*",
+                "s3:List*",
+                "s3-object-lambda:Get*",
+                "s3-object-lambda:List*"
+            ],
+            "Resource": [
+                "arn:aws:s3:::tpc-h-raw-data-df/*",
+                "arn:aws:s3:::tpc-h-raw-data-df"
+                ]
+        }
+    ]
+}
