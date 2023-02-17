@@ -134,27 +134,6 @@ resource "aws_db_instance" "tpc_h_db" {
 }
 
 
-# data "aws_ami" "amazon_linux_2" {
-#   most_recent = true
-
-#   filter {
-#     name   = "name"
-#     values = ["amzn2-ami-*-hvm-*-arm64-gp2"]
-#   }
-
-#   filter {
-#     name   = "virtualization-type"
-#     values = ["hvm"]
-#   }
-
-#   filter {
-#     name   = "root-device-type"
-#     values = ["ebs"]
-#   }
-
-#   owners = ["amazon"] # Amazon
-# }
-
 resource "aws_instance" "load_dev_data" {
   count = var.active ? 1 : 0
   ami           = var.ami
@@ -167,12 +146,48 @@ resource "aws_instance" "load_dev_data" {
 
   vpc_security_group_ids = [ "${aws_security_group.allow_ssh.id}" ]
 
-  user_data = "${file("bootstrap/run.sh")}"
+  user_data = <<EOF
+    #!/bin/bash
+
+    sudo yum update
+    sudo yum install -y telnet
+    sudo yum install -y amazon-linux-extras
+    sudo amazon-linux-extras install postgresql14
+
+    mkdir -p /home/ec2-user/data/
+    mkdir -p /home/ec2-user/sql
+
+    sudo chown -R ec2-user:ec2-user /home/ec2-user/data/
+    sudo chown -R ec2-user:ec2-user /home/ec2-user/sql/
+
+    aws s3 cp s3://tpc-h-raw-data-df/raw/customer.tbl /home/ec2-user/data/
+    aws s3 cp s3://tpc-h-raw-data-df/raw/lineitem.tbl /home/ec2-user/data/
+    aws s3 cp s3://tpc-h-raw-data-df/raw/nation.tbl /home/ec2-user/data/
+    aws s3 cp s3://tpc-h-raw-data-df/raw/orders.tbl /home/ec2-user/data/
+    aws s3 cp s3://tpc-h-raw-data-df/raw/part.tbl /home/ec2-user/data/
+    aws s3 cp s3://tpc-h-raw-data-df/raw/partsupp.tbl /home/ec2-user/data/
+    aws s3 cp s3://tpc-h-raw-data-df/raw/region.tbl /home/ec2-user/data/
+    aws s3 cp s3://tpc-h-raw-data-df/raw/supplier.tbl /home/ec2-user/data/
+    
+    aws s3 cp s3://tpc-h-raw-data-df/sql/tables.sql /home/ec2-user/sql/
+    aws s3 cp s3://tpc-h-raw-data-df/sql/load_data.sh /home/ec2-user/sql/
+    
+    sudo chmod +x /home/ec2-user/sql/load_data.sh
+
+    sudo chown ec2-user:ec2-user /home/ec2-user/sql/load_data.sh
+    sudo chown ec2-user:ec2-user /home/ec2-user/sql/tables.sql
+
+    #Run a psql statement in batch
+    sudo echo "${aws_db_instance.tpc_h_db.address}" > /home/ec2-user/address.txt
+    sudo psql -h "${aws_db_instance.tpc_h_db.address}" -U awsuser -d tpchdb01 -p 5432 -f /home/ec2-user/sql/tables.sql
+
+    # Load the data
+    sudo /home/ec2-user/sql/load_data.sh "${var.password}" "${aws_db_instance.tpc_h_db.address}"
+    
+  EOF
 
   tags = {
     Name = "${var.prefix}"
   }
 }
-
-
 

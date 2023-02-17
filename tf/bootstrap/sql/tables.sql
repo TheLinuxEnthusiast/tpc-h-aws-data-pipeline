@@ -33,8 +33,7 @@ CREATE TABLE IF NOT EXISTS production.nation (
 	"name" varchar(255),
 	"regionkey" integer,
 	"comment" varchar(255),
-	"desc" varchar(10),
-	FOREIGN KEY (regionKey) REFERENCES production.region (regionKey)
+	"desc" varchar(10)
 );
 
 CREATE TABLE IF NOT EXISTS production.supplier (
@@ -45,8 +44,7 @@ CREATE TABLE IF NOT EXISTS production.supplier (
 	"phone" varchar(255),
 	"acctbal" varchar(255),
 	"comment" varchar(255),
-	"desc" varchar(10),
-	FOREIGN KEY (nationKey) REFERENCES production.nation (nationKey)
+	"desc" varchar(10)
 );
 
 CREATE TABLE IF NOT EXISTS production.customer (
@@ -58,8 +56,7 @@ CREATE TABLE IF NOT EXISTS production.customer (
 	"accbal" varchar(255),
 	"mktsegment" varchar(255),
 	"comment" varchar(255),
-	"desc" varchar(10),
-	FOREIGN KEY (nationKey) REFERENCES production.nation (nationKey)
+	"desc" varchar(10)
 );
 
 CREATE TABLE IF NOT EXISTS production.orders (
@@ -72,8 +69,7 @@ CREATE TABLE IF NOT EXISTS production.orders (
 	"clerk" varchar(255),
 	"shippriority" varchar(255),
 	"comment" varchar(255),
-	"desc" varchar(10),
-	FOREIGN KEY (custkey) REFERENCES production.customer (custkey)
+	"desc" varchar(10)
 );
 
 CREATE TABLE IF NOT EXISTS production.part (
@@ -96,9 +92,7 @@ CREATE TABLE IF NOT EXISTS production.partsupp (
 	"supplycost" varchar(255),
 	"comment" varchar(255),
 	"desc" varchar(10),
-	PRIMARY KEY(partkey, suppkey),
-	FOREIGN KEY (suppkey) REFERENCES production.supplier (suppkey),
-	FOREIGN KEY (partkey) REFERENCES production.part (partkey)
+	PRIMARY KEY(partkey, suppkey)
 );
 
 
@@ -120,10 +114,7 @@ CREATE TABLE IF NOT EXISTS production.lineitem (
 	"shipmode" varchar(255),
 	"comment" varchar(255),
 	"desc" varchar(10),
-	PRIMARY KEY(orderkey, partkey, suppkey, linenumber),
-	FOREIGN KEY (orderKey) REFERENCES production.order (orderKey),
-	FOREIGN KEY (partkey) REFERENCES production.part (partkey),
-	FOREIGN KEY (suppkey) REFERENCES production.supplier (suppkey)
+	PRIMARY KEY(orderkey, partkey, suppkey, linenumber)
 );
 
 
